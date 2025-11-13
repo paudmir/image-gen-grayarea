@@ -1,0 +1,19 @@
+body {
+  margin: 10px;
+  font-family: sans-serif;
+}
+
+#promptInput {
+  width: 400px;
+  padding: 8px;
+  margin-right: 5px;
+}
+
+#generateBtn {
+  padding: 8px 16px;
+}
+
+canvas {
+  display: block;
+  margin-top: 10px;
+}
