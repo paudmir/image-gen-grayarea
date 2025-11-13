@@ -156,7 +156,12 @@ async function generateImage() {
   updateStatus('Generating your image...', 'info');
 
   try {
-    const response = await fetch('http://localhost:3000/generate-image', {
+    // Use environment-aware URL: relative path in production, localhost in development
+    const apiUrl = window.location.hostname === 'localhost'
+      ? 'http://localhost:3000/generate-image'
+      : '/generate-image';
+
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
