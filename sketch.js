@@ -3,15 +3,24 @@ let isLoading = false;
 let loadingAngle = 0;
 let statusText = '';
 
+// Pixelate animation
+let pixelateProgress = 0; // 0 = normal, 1 = fully pixelated
+let targetProgress = 0; // What we're animating towards
+let animating = false;
+let animationStartTime = 0;
+const ANIMATION_DURATION = 2000; // 2 seconds
+
 function setup() {
   let canvas = createCanvas(600, 600);
   canvas.parent('canvas-container');
 
-  // Set up button click handler
+  // Set up button click handlers
   const generateBtn = document.getElementById('generateBtn');
+  const pixelateBtn = document.getElementById('pixelateBtn');
   const promptInput = document.getElementById('promptInput');
 
   generateBtn.addEventListener('click', () => generateImage());
+  pixelateBtn.addEventListener('click', () => togglePixelate());
 
   // Allow Enter key to trigger generation
   promptInput.addEventListener('keypress', (e) => {
@@ -81,7 +90,25 @@ function drawLoadingSpinner() {
 
 function drawGeneratedImage() {
   push();
-  imageMode(CENTER);
+
+  // Update animation
+  if (animating) {
+    let elapsed = millis() - animationStartTime;
+    let t = constrain(elapsed / ANIMATION_DURATION, 0, 1);
+    // Ease in-out cubic for smooth animation
+    let eased = t < 0.5
+      ? 4 * t * t * t
+      : 1 - pow(-2 * t + 2, 3) / 2;
+
+    // Interpolate between current and target
+    let startProgress = targetProgress === 1 ? 0 : 1;
+    pixelateProgress = lerp(startProgress, targetProgress, eased);
+
+    if (t >= 1) {
+      animating = false;
+      pixelateProgress = targetProgress;
+    }
+  }
 
   // Calculate scaling to fit nicely in canvas while maintaining aspect ratio
   let imgWidth = generatedImage.width;
@@ -92,8 +119,23 @@ function drawGeneratedImage() {
   let displayWidth = imgWidth * scale;
   let displayHeight = imgHeight * scale;
 
-  // Draw image centered
-  image(generatedImage, width / 2, height / 2, displayWidth, displayHeight);
+  // Apply pixelate effect
+  if (pixelateProgress > 0) {
+    // Pixel size ranges from 1 (normal) to 20 (very pixelated)
+    let pixelSize = floor(1 + pixelateProgress * 19);
+
+    // Create a temporary graphics buffer for the effect
+    let pg = createGraphics(floor(displayWidth / pixelSize), floor(displayHeight / pixelSize));
+    pg.image(generatedImage, 0, 0, pg.width, pg.height);
+
+    imageMode(CENTER);
+    image(pg, width / 2, height / 2, displayWidth, displayHeight);
+    pg.remove(); // Clean up
+  } else {
+    // Draw normal image
+    imageMode(CENTER);
+    image(generatedImage, width / 2, height / 2, displayWidth, displayHeight);
+  }
 
   pop();
 }
@@ -150,4 +192,23 @@ function updateStatus(message, type = 'info') {
   const statusElement = document.getElementById('statusText');
   statusElement.textContent = message;
   statusElement.className = `info ${type}`;
+}
+
+function togglePixelate() {
+  if (!generatedImage) {
+    updateStatus('Generate an image first!', 'error');
+    return;
+  }
+
+  // Toggle between pixelated and normal
+  if (pixelateProgress < 0.5) {
+    // Animate to pixelated
+    targetProgress = 1;
+  } else {
+    // Animate back to normal
+    targetProgress = 0;
+  }
+
+  animating = true;
+  animationStartTime = millis();
 }
