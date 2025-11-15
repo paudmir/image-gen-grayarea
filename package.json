@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
      "start": "node server.js",
-    "dev": "concurrently \"node server.js\" \"npx http-server -p 8000 -c-1\"",
+    "dev": "concurrently \"node server.js\" \"npx http-server -p 8000 -c-1\""
   },
   "keywords": [
     "cloudflare",
