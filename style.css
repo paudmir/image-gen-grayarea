@@ -1,6 +1,7 @@
 body {
   margin: 10px;
   font-family: sans-serif;
+  background-image: url('assets/woody.png');
 }
 
 #promptInput {
@@ -16,4 +17,17 @@ body {
 canvas {
   display: block;
   margin-top: 10px;
+}
+
+.instructions {
+  background-color: #be4c1F;
+}
+
+h1 {
+  /*color:white;*/
+  font-family: "Coral Pixels", serif;
+  font-optical-sizing: auto;
+  font-weight: 200;
+  font-size: 50;
+  background-color: white;
 }
